@@ -1,22 +1,24 @@
 package com.seied.datamining.converter;
 
+import java.util.List;
+
 /**
  * Created by Aleksander on 2014-11-13.
  */
 public class Item {
     private final int client;
-    private final int product;
+    private final List<Integer> products;
 
-    public Item(int client, int product) {
+    public Item(int client, List<Integer> products) {
         this.client = client;
-        this.product = product;
+        this.products = products;
     }
 
     public int getClient() {
         return client;
     }
 
-    public int getProduct() {
-        return product;
+    public List<Integer> getProducts() {
+        return products;
     }
 }

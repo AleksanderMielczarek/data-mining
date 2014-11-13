@@ -23,7 +23,7 @@ public class DataLoader {
         Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            reader.lines().map(dataConverter::convert).forEach(i -> multimap.put(i.getClient(), i.getProduct()));
+            reader.lines().map(dataConverter::convert).forEach(i -> multimap.putAll(i.getClient(), i.getProducts()));
             return multimap;
         }
     }
