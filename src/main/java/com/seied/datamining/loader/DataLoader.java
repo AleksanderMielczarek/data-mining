@@ -1,6 +1,5 @@
 package com.seied.datamining.loader;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.seied.datamining.converter.DataConverter;
 
@@ -20,11 +19,9 @@ public class DataLoader {
     }
 
     public Multimap<Integer, Integer> load(File file) throws IOException {
-        Multimap<Integer, Integer> multimap = ArrayListMultimap.create();
-
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            reader.lines().map(dataConverter::convert).forEach(i -> multimap.putAll(i.getClient(), i.getProducts()));
-            return multimap;
+            reader.lines().forEach(dataConverter::convert);
+            return dataConverter.buildData();
         }
     }
 }
