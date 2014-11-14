@@ -15,28 +15,20 @@ import java.util.stream.Collector;
  * Created by Aleksander on 2014-11-13.
  */
 public class MultimapCollector implements Collector<String, Multimap<Integer, Integer>, Multimap<Integer, Integer>> {
-    private final Multimap<Integer, Integer> data;
+    private final BiConsumer<Multimap<Integer, Integer>, String> converter;
 
-    public MultimapCollector() {
-        data = ArrayListMultimap.create();
-    }
-
-    private Multimap<Integer, Integer> getData() {
-        return data;
+    public MultimapCollector(BiConsumer<Multimap<Integer, Integer>, String> converter) {
+        this.converter = converter;
     }
 
     @Override
     public Supplier<Multimap<Integer, Integer>> supplier() {
-        return this::getData;
+        return ArrayListMultimap::create;
     }
 
     @Override
     public BiConsumer<Multimap<Integer, Integer>, String> accumulator() {
-        return (builder, s) -> {
-            s = s.replace("\"", "");
-            String[] split = s.split(";");
-            builder.put(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
-        };
+        return converter;
     }
 
     @Override
