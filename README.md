@@ -6,15 +6,15 @@ Data Miner gathering information in txt file with shopping data.
 Example
 -------------------------
 
- **Arguments**
+**Arguments**
 
- In order to run program, user has to pass following arguments:
+In order to run program, user has to pass following arguments:
 
- - -f, path to file with data
- - -t, value of support threshold
- - -p, number of products
+- -f, path to file with data
+- -t, value of support threshold
+- -p, number of products
 
- **Input**
+**Input**
 
 Input must be save in *.txt file with such a format.
 
