@@ -8,84 +8,86 @@ import java.util.stream.Collectors;
 /**
  * Created by Aleksander on 2014-11-13.
  */
-public class AprioriDataMiner {
+public class AprioriDataMiner implements DataMiner {
+
     private final int supportThreshold;
     private final int upperLimit;
-    private final ArrayList<List<Integer>> productsChoice;
+    private List<List<Integer>> productsChoice;
     private Set<Integer> allProducts;
 
-    public AprioriDataMiner(int supportThreshold, int upperLimit, Multimap<Integer, Integer> data) {
+    public AprioriDataMiner(int supportThreshold, int upperLimit) {
         this.supportThreshold = supportThreshold;
         this.upperLimit = upperLimit;
-        this.allProducts = getAllProducts(data);
-        this.productsChoice = getProductChoice(data);
     }
 
-    public Result mine() {
-        Set<ArrayList<Integer>> productsCombination = getFirstCombinationList();
+    @Override
+    public Result mine(Multimap<Integer, Integer> data) {
+        allProducts = getAllProducts(data);
+        productsChoice = getProductChoice(data);
+        Set<List<Integer>> productsCombination = getFirstCombinationList();
         Result result = processData(productsCombination);
         return result;
     }
 
-    private Set<ArrayList<Integer>> getFirstCombinationList() {
-        Set<ArrayList<Integer>> firstCombinationList = new HashSet<>();
+    private Set<List<Integer>> getFirstCombinationList() {
+        Set<List<Integer>> firstCombinationList = new HashSet<>();
         allProducts.forEach(product -> {
-            ArrayList<Integer> internalArrayList = new ArrayList<>(1);
+            List<Integer> internalArrayList = new ArrayList<>(1);
             internalArrayList.add(product);
             firstCombinationList.add(internalArrayList);
         });
         return firstCombinationList;
     }
 
-    private Result processData(Set<ArrayList<Integer>> productsCombination) {
-        HashMap<ArrayList<Integer>, Integer> productsOccurences;
-        Set<ArrayList<Integer>> productsToCombinationList;
-        productsOccurences = checkProductsOccurences(productsCombination);
+    private Result processData(Set<List<Integer>> productsCombination) {
+        Map<List<Integer>, Integer> productsOccurrences;
+        Set<List<Integer>> productsToCombinationList;
+        productsOccurrences = checkProductsOccurrences(productsCombination);
 
-        for (int i=1;i<this.upperLimit;i++) {
-            deleteWrongProducts(productsOccurences);
-            productsToCombinationList = getProductsToCombinationList(productsOccurences);
+        for (int i = 1; i < this.upperLimit; i++) {
+            deleteWrongProducts(productsOccurrences);
+            productsToCombinationList = getProductsToCombinationList(productsOccurrences);
             productsCombination = createCombinations(productsToCombinationList);
-            productsOccurences = checkProductsOccurences(productsCombination);
+            productsOccurrences = checkProductsOccurrences(productsCombination);
         }
 
-        return new Result(productsOccurences);
+        return new Result(productsOccurrences);
     }
 
-    private HashMap<ArrayList<Integer>, Integer> checkProductsOccurences(Set<ArrayList<Integer>> allProductsCombination) {
-        HashMap<ArrayList<Integer>, Integer> resultProductOccurences = new HashMap<>();
-        for(ArrayList<Integer> productsCombination:allProductsCombination) {
-            int occurences = 0;
-            for(List singleProductsChoice: productsChoice) {
-                if(singleProductsChoice.containsAll(productsCombination))
-                    occurences++;
+    private Map<List<Integer>, Integer> checkProductsOccurrences(Set<List<Integer>> allProductsCombination) {
+        Map<List<Integer>, Integer> resultProductOccurrences = new HashMap<>();
+        for (List<Integer> productsCombination : allProductsCombination) {
+            int occurrences = 0;
+            for (List singleProductsChoice : productsChoice) {
+                if (singleProductsChoice.containsAll(productsCombination))
+                    occurrences++;
             }
-            if(occurences >= this.supportThreshold)
-                resultProductOccurences.put(productsCombination, occurences);
+            if (occurrences >= this.supportThreshold)
+                resultProductOccurrences.put(productsCombination, occurrences);
         }
 
-        return resultProductOccurences;
+        return resultProductOccurrences;
     }
 
-    private void deleteWrongProducts(HashMap<ArrayList<Integer>, Integer> productsOccurences) {
-        ArrayList<Integer> goodProducts = new ArrayList<>();
-        productsOccurences.keySet().forEach(key -> key.forEach(goodProducts::add));
+    private void deleteWrongProducts(Map<List<Integer>, Integer> productsOccurrences) {
+        List<Integer> goodProducts = new ArrayList<>();
+        productsOccurrences.keySet().forEach(key -> key.forEach(goodProducts::add));
         allProducts = allProducts.stream()
                 .filter(goodProducts::contains)
                 .collect(Collectors.toCollection(HashSet<Integer>::new));
     }
 
-    private Set<ArrayList<Integer>> getProductsToCombinationList(HashMap<ArrayList<Integer>, Integer> productsOccurences) {
-        return productsOccurences.keySet();
+    private Set<List<Integer>> getProductsToCombinationList(Map<List<Integer>, Integer> productsOccurrences) {
+        return productsOccurrences.keySet();
     }
 
-    private Set<ArrayList<Integer>> createCombinations(Set<ArrayList<Integer>> productsToCombinationList) {
-        Set<ArrayList<Integer>> productsCombination = new HashSet<>();
+    private Set<List<Integer>> createCombinations(Set<List<Integer>> productsToCombinationList) {
+        Set<List<Integer>> productsCombination = new HashSet<>();
         productsToCombinationList.forEach(productToComb -> {
-            for (int product:allProducts) {
-                ArrayList<Integer> productsCombinationElement = new ArrayList<>();
+            for (int product : allProducts) {
+                List<Integer> productsCombinationElement = new ArrayList<>();
                 productsCombinationElement.addAll(productToComb);
-                if(!productsCombinationElement.contains(product)) {
+                if (!productsCombinationElement.contains(product)) {
                     productsCombinationElement.add(product);
                     productsCombinationElement = productsCombinationElement
                             .stream()
@@ -104,12 +106,11 @@ public class AprioriDataMiner {
         return allProducts;
     }
 
-    private ArrayList<List<Integer>> getProductChoice(Multimap<Integer, Integer> data) {
-        ArrayList<List<Integer>> productChoice = new ArrayList<>();
-        for(Integer key:data.keySet()) {
-            productChoice.add((List<Integer>) data.get(key));
-        }
+    private List<List<Integer>> getProductChoice(Multimap<Integer, Integer> data) {
+        List<List<Integer>> productChoice = data.keySet().stream()
+                .map(key -> (List<Integer>) data.get(key))
+                .collect(Collectors.toList());
+
         return productChoice;
     }
-
 }
